@@ -21,7 +21,7 @@ const booking = (id, { page = "CareMatchr demo", name = "Ada Example", start = "
   id, status: "confirmed", summary: `${page} (${name})`, created,
   start: { dateTime: start }, end: { dateTime: end },
   hangoutLink: "https://meet.google.com/aaa-bbbb-ccc", htmlLink: `https://calendar.example/${id}`,
-  description: "Booked by\nAda Example\nada@example.org\n\nOrganisation\nExample Care Ltd",
+  description: "<b>Booked by</b>\nAda Example\nada@example.org\n<br><b>Organisation</b>\nExample Care &amp; Co Ltd\n<br>A 30-minute demo.",
   organizer: { email: CAL, self: false },
   attendees: [
     { email: "toye.akande@issacharson.com", organizer: false },
@@ -120,7 +120,8 @@ test("a new booking sends one email to careshow-team@ with the page, time, booke
   assert.match(mail.body, /Email: ada@example\.org\n/);
   assert.doesNotMatch(mail.body, /Email: .*issacharson\.com/, "the team and the group aren't the booker");
   assert.match(mail.body, /Meet: https:\/\/meet\.google\.com\/aaa-bbbb-ccc/);
-  assert.match(mail.body, /Organisation\nExample Care Ltd/);
+  assert.match(mail.body, /Booked by\nAda Example\nada@example\.org\n\nOrganisation\nExample Care & Co Ltd\n\nA 30-minute demo\./, "Google's HTML details read as plain text");
+  assert.doesNotMatch(mail.body, /<\/?b>|<br>|&amp;/);
   assert.match(mail.body, /Assign to me/);
   assert.deepEqual([...result.told], ["booked e1"]);
   assert.equal(store.BN_SYNC_TOKEN, "token-1");

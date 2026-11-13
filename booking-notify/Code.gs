@@ -255,7 +255,7 @@ function handle_(event, now, full, lastRun) {
     end: endOf_(event),
     meet: event.hangoutLink || '',
     link: event.htmlLink || '',
-    details: String(event.description || '').slice(0, BN.MAX_DETAILS),
+    details: plainText_(event.description).slice(0, BN.MAX_DETAILS),
   };
 
   if (!before) {
@@ -273,6 +273,25 @@ function handle_(event, now, full, lastRun) {
   }
   remember_(id, record);
   return '';
+}
+
+// Google keeps a booking's details as HTML ("<b>Booked by</b>...<br>"), so the
+// email would show the tags (OBSERVED in the live check, 13 Nov 2026). Turn it
+// into plain text: line breaks for <br> and block ends, no tags, entities read.
+function plainText_(html) {
+  return String(html || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 // The booker: guests outside issacharson.com (the team and the group are
